@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Your Market Position — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <h1>Your market position</h1>
+        <p class="text-muted">How your own skills and salary expectations compare to current demand — not a generic role average, but analysis of your actual profile.</p>
+
+        <div class="grid grid-2 mt-2">
+            <div class="card">
+                <h2>Salary comparison</h2>
+                {% if profile.expected_salary %}
+                    <p>Market estimate for your profile ({{ profile.get_experience_level_display }}, {{ profile.desired_location|default:"any location" }}):</p>
+                    <h3 style="color:var(--color-primary);">${{ position.prediction.predicted_min|floatformat:0 }} – ${{ position.prediction.predicted_max|floatformat:0 }}</h3>
+                    <p>Your expected salary: <strong>${{ profile.expected_salary|floatformat:0 }}</strong></p>
+                    {% if position.gap is not None %}
+                        {% if position.gap > 0 %}
+                            <span class="badge badge-warn">{{ position.gap_pct }}% above the market estimate</span>
+                        {% elif position.gap < 0 %}
+                            <span class="badge badge-info">{{ position.gap_pct|cut:"-" }}% below the market estimate</span>
+                        {% else %}
+                            <span class="badge badge-success">Right at the market estimate</span>
+                        {% endif %}
+                    {% endif %}
+                    <hr class="divider">
+                    <h3 style="font-size:0.95rem;">How this was calculated</h3>
+                    <ul style="font-size:0.85rem; padding-left:18px;">
+                        {% for factor in position.prediction.factors %}<li>{{ factor }}</li>{% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">Add an expected salary to your profile to see how it compares to the market.</p>
+                    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-sm">Update profile</a>
+                {% endif %}
+            </div>
+
+            <div class="card">
+                <h2>Skill gap analysis</h2>
+                <p class="text-muted" style="font-size:0.85rem;">
+                    {% if gap_analysis.role_specific %}
+                        Based on {{ gap_analysis.role_matched_jobs }} open role{{ gap_analysis.role_matched_jobs|pluralize }} matching "{{ profile.desired_role }}".
+                    {% else %}
+                        Based on {{ gap_analysis.role_matched_jobs }} open roles across the platform (add a desired role to your profile for a more targeted comparison).
+                    {% endif %}
+                </p>
+
+                <h3 style="font-size:0.95rem;">Skills you have that are in demand</h3>
+                {% for entry in gap_analysis.have %}
+                    <div class="flex-between" style="padding:6px 0;">
+                        <span>{{ entry.skill.name }}</span>
+                        <span class="badge badge-success">{{ entry.demand }} jobs</span>
+                    </div>
+                {% empty %}
+                    <p class="text-muted" style="font-size:0.85rem;">None of your current skills matched — add more skills to your profile.</p>
+                {% endfor %}
+
+                <h3 style="font-size:0.95rem; margin-top:16px;">High-demand skills you're missing</h3>
+                {% for entry in gap_analysis.missing %}
+                    <div class="flex-between" style="padding:6px 0;">
+                        <a href="{{ entry.skill.get_absolute_url }}">{{ entry.skill.name }}</a>
+                        <span class="badge badge-warn">{{ entry.demand }} jobs</span>
+                    </div>
+                {% empty %}
+                    <p class="text-muted" style="font-size:0.85rem;">You already cover the top in-demand skills for this role. 🎉</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline">Update your skills &amp; expectations</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

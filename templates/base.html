@@ -1,0 +1,79 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ SITE_NAME }}{% endblock %} — Job Market Analytics</title>
+    <meta name="description" content="{% block meta_description %}{{ meta_description|default:SITE_DESCRIPTION }}{% endblock %}">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="{% block og_title %}{{ SITE_NAME }}{% endblock %}">
+    <meta property="og:description" content="{{ meta_description|default:SITE_DESCRIPTION }}">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a href="{% url 'jobs:home' %}" class="brand">📈 <span>{{ SITE_NAME }}</span></a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+            <nav class="main-nav" id="mainNav">
+                <a href="{% url 'jobs:job_list' %}">Browse Jobs</a>
+                <a href="{% url 'jobs:company_list' %}">Companies</a>
+                <a href="{% url 'analytics:dashboard' %}">Market Insights</a>
+                <a href="{% url 'analytics:salary_predictor' %}">Salary Predictor</a>
+                {% if user.is_authenticated %}
+                    {% if user.profile.is_employer %}
+                        <a href="{% url 'jobs:job_create' %}">Post a Job</a>
+                        <a href="{% url 'jobs:my_job_postings' %}">My Postings</a>
+                    {% else %}
+                        <a href="{% url 'analytics:recommendations' %}">For You</a>
+                        <a href="{% url 'analytics:market_position' %}">My Market Position</a>
+                    {% endif %}
+                    <a href="{% url 'accounts:dashboard' %}">Dashboard</a>
+                    <form action="{% url 'accounts:logout' %}" method="post" class="inline-form" data-confirm="Log out of {{ SITE_NAME }}?">
+                        {% csrf_token %}
+                        <button type="submit" class="link-button">Log out</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}">Log in</a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-sm">Sign up</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="container messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div>
+                <strong>{{ SITE_NAME }}</strong>
+                <p>Data-driven job market analytics and salary predictions — {{ site_metrics.total_active_jobs }} active jobs across {{ site_metrics.total_companies }} companies.</p>
+            </div>
+            <div class="footer-links">
+                <a href="{% url 'jobs:job_list' %}">Browse Jobs</a>
+                <a href="{% url 'analytics:dashboard' %}">Market Insights</a>
+                <a href="{% url 'analytics:salary_predictor' %}">Salary Predictor</a>
+                <a href="{% url 'jobs:company_list' %}">Companies</a>
+            </div>
+            <div class="footer-note">&copy; {% now "Y" %} {{ SITE_NAME }}. Sample data for demonstration purposes.</div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

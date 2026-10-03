@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Salary Predictor — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <h1>Salary predictor</h1>
+        <p class="text-muted">A transparent, rule-based estimate blending a baseline compensation model with observed market data — no external AI service required.</p>
+
+        {% if user.is_authenticated and not used_profile %}
+            <p class="mt-1"><a href="?use_profile=1">Prefill this form from my profile &rarr;</a></p>
+        {% elif used_profile %}
+            <p class="mt-1 text-muted">Prefilled from your profile. <a href="{% url 'analytics:salary_predictor' %}">Clear</a></p>
+        {% endif %}
+
+        <div class="grid" style="grid-template-columns: 1fr 1fr; align-items:start;">
+            <form method="post" class="card">
+                {% csrf_token %}
+                {% for field in form %}
+                    {% if field.name != 'skills' %}
+                        <div class="field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                <div class="field">
+                    <label>Skills</label>
+                    <div class="checkbox-grid">
+                        {% for checkbox in form.skills %}
+                            <label class="checkbox-field">{{ checkbox.tag }} {{ checkbox.choice_label }}</label>
+                        {% endfor %}
+                    </div>
+                    <span class="helptext">{{ form.skills.help_text }}</span>
+                </div>
+                <button type="submit" class="btn btn-block mt-2">Predict salary</button>
+            </form>
+
+            <div>
+                {% if prediction %}
+                    <div class="card">
+                        <div class="text-muted" style="font-size:0.85rem;">Estimated salary range</div>
+                        <h2 style="color:var(--color-primary);">${{ prediction.predicted_min|floatformat:0 }} – ${{ prediction.predicted_max|floatformat:0 }}</h2>
+                        <div class="flex gap-1" style="align-items:center;">
+                            <span class="badge badge-accent">Confidence: {{ prediction.confidence }}%</span>
+                            <span class="text-muted" style="font-size:0.8rem;">{{ prediction.basis }}</span>
+                        </div>
+                        <hr class="divider">
+                        <h3 style="font-size:0.95rem;">How this was calculated</h3>
+                        <ul style="font-size:0.88rem; padding-left:18px;">
+                            {% for factor in prediction.factors %}<li>{{ factor }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="empty-state card">
+                        <p>Fill out the form to get an instant salary estimate.</p>
+                    </div>
+                {% endif %}
+                {% if user.is_authenticated %}
+                    <p class="mt-2 text-center"><a href="{% url 'analytics:market_position' %}">See your full personalized market position &rarr;</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

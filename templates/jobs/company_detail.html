@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}{{ company.name }} — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <div class="card mb-3">
+            <div class="flex gap-2" style="align-items:center;">
+                <div class="company-logo-placeholder avatar-lg">{{ company.name|slice:":1" }}</div>
+                <div>
+                    <h1 style="margin-bottom:4px;">{{ company.name }}</h1>
+                    <p class="text-muted" style="margin:0;">{{ company.industry }} &middot; {{ company.headquarters }} &middot; {{ company.get_size_display }}</p>
+                    {% if rating_avg %}<p class="mt-1">⭐ {{ rating_avg|floatformat:1 }} average rating ({{ reviews.count }} review{{ reviews.count|pluralize }})</p>{% endif %}
+                </div>
+            </div>
+            <p class="mt-2">{{ company.description }}</p>
+            {% if company.website %}<a href="{{ company.website }}" target="_blank" rel="noopener">{{ company.website }}</a>{% endif %}
+        </div>
+
+        <div class="grid" style="grid-template-columns: 2fr 1fr; align-items:start;">
+            <div>
+                <h2>Open roles ({{ jobs.count }})</h2>
+                <div class="grid grid-2 mb-3">
+                    {% for job in jobs %}
+                        {% include "partials/job_card.html" %}
+                    {% empty %}
+                        <p class="text-muted">No open roles right now.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                <h2>Reviews</h2>
+                {% if review_form %}
+                <div class="card mb-2">
+                    <h3 style="font-size:1rem;">Leave a review</h3>
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in review_form %}
+                            <div class="field">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                            </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-sm">Post review</button>
+                    </form>
+                </div>
+                {% endif %}
+
+                {% for review in reviews %}
+                    <div class="card mb-2">
+                        <div class="flex-between">
+                            <strong>{{ review.title }}</strong>
+                            <span class="badge badge-warn">{{ review.rating }}★</span>
+                        </div>
+                        <p class="text-muted" style="font-size:0.9rem;">{{ review.body }}</p>
+                        <div class="text-muted" style="font-size:0.78rem;">{{ review.user.username }} &middot; {{ review.created_at|naturaltime }}</div>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No reviews yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

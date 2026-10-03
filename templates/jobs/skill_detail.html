@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load job_extras %}
+{% block title %}{{ skill.name }} jobs — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <h1>{{ skill.name }} jobs</h1>
+        <p class="text-muted">{{ skill.get_skill_type_display }} &middot; {{ page_obj.paginator.count }} open role{{ page_obj.paginator.count|pluralize }} requiring this skill.</p>
+
+        <div class="grid grid-3 mt-2">
+            {% for job in jobs %}
+                {% include "partials/job_card.html" %}
+            {% empty %}
+                <p class="text-muted">No open roles require this skill right now.</p>
+            {% endfor %}
+        </div>
+
+        {% querystring_without_page as qs %}
+        {% include "partials/pagination.html" with query_string=qs %}
+    </div>
+</section>
+{% endblock %}

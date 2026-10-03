@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Employer Dashboard — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <div class="flex-between mb-2">
+            <div>
+                <h1>Welcome back, {{ user.first_name|default:user.username }}</h1>
+                <p class="text-muted">Employer / recruiter account</p>
+            </div>
+            {% if company %}
+                <a href="{% url 'jobs:company_setup' %}" class="btn btn-outline">Edit company profile</a>
+            {% endif %}
+        </div>
+
+        {% if not company %}
+            <div class="empty-state card">
+                <p>You haven't set up your company yet — do that first to start posting jobs.</p>
+                <a href="{% url 'jobs:company_setup' %}" class="btn">Set up your company</a>
+            </div>
+        {% else %}
+            <div class="grid grid-3 mb-3">
+                <div class="card">
+                    <div class="text-muted" style="font-size:0.85rem;">Company</div>
+                    <div style="font-size:1.2rem; font-weight:700;">{{ company.name }}</div>
+                    <a href="{{ company.get_absolute_url }}">View public page &rarr;</a>
+                </div>
+                <div class="card">
+                    <div class="text-muted" style="font-size:0.85rem;">Job postings</div>
+                    <div style="font-size:1.6rem; font-weight:800;">{{ posting_count }}</div>
+                    <a href="{% url 'jobs:my_job_postings' %}">Manage postings &rarr;</a>
+                </div>
+                <div class="card">
+                    <div class="text-muted" style="font-size:0.85rem;">Total applications received</div>
+                    <div style="font-size:1.6rem; font-weight:800;">{{ total_applications }}</div>
+                </div>
+            </div>
+
+            <div class="flex-between mb-2">
+                <h2>Recent postings</h2>
+                <a href="{% url 'jobs:job_create' %}" class="btn btn-sm">Post a new job</a>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Title</th><th>Status</th><th>Posted</th><th></th></tr></thead>
+                    <tbody>
+                    {% for job in postings %}
+                        <tr>
+                            <td><a href="{{ job.get_absolute_url }}">{{ job.title }}</a></td>
+                            <td>{% if job.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-muted">Inactive</span>{% endif %}</td>
+                            <td class="text-muted">{{ job.posted_at|naturaltime }}</td>
+                            <td><a href="{% url 'jobs:job_edit' job.slug %}">Edit</a></td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" class="text-muted">No postings yet.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center mt-2">
+                <a href="{% url 'jobs:my_job_postings' %}">View all postings &rarr;</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

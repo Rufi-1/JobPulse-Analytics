@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Market Insights — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <h1>Market insights</h1>
+        <p class="text-muted">Live analytics across {{ total_jobs }} active job postings and {{ total_companies }} companies.</p>
+
+        <div class="chart-grid mt-3">
+            <div class="chart-card">
+                <h3>Jobs by category</h3>
+                <canvas id="categoryChart" height="220"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Top 10 in-demand skills</h3>
+                <canvas id="skillChart" height="220"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Jobs by location</h3>
+                <canvas id="locationChart" height="220"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Jobs by experience level</h3>
+                <canvas id="experienceChart" height="220"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Work arrangement</h3>
+                <canvas id="remoteChart" height="220"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Average starting salary by category</h3>
+                <canvas id="salaryCategoryChart" height="220"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card mt-3">
+            <h3>Average salary trend (last 12 months)</h3>
+            <canvas id="salaryTrendChart" height="100"></canvas>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'analytics:salary_predictor' %}" class="btn">Predict a salary</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof Chart === 'undefined') {
+    document.querySelectorAll('.chart-card canvas').forEach(function (c) {
+      var msg = document.createElement('p');
+      msg.className = 'text-muted';
+      msg.style.fontSize = '0.85rem';
+      msg.textContent = 'Chart library failed to load from the CDN — check your internet connection or browser console for a blocked-request error.';
+      c.replaceWith(msg);
+    });
+    return;
+  }
+
+  var palette = ['#2f5fff', '#14b8a6', '#f59e0b', '#ef4444', '#8b5cf6', '#0ea5e9', '#22c55e', '#ec4899', '#64748b', '#eab308'];
+
+  function showError(id, err) {
+    var el = document.getElementById(id);
+    console.error('Chart "' + id + '" failed to render:', err);
+    if (el) {
+      var msg = document.createElement('p');
+      msg.className = 'text-muted';
+      msg.style.fontSize = '0.8rem';
+      msg.textContent = 'This chart could not be rendered (see browser console for details).';
+      el.replaceWith(msg);
+    }
+  }
+
+  function bar(id, labels, data, label) {
+    try {
+      new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: { labels: labels, datasets: [{ label: label, data: data, backgroundColor: palette }] },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      });
+    } catch (err) {
+      showError(id, err);
+    }
+  }
+
+  function doughnut(id, labels, data) {
+    try {
+      new Chart(document.getElementById(id), {
+        type: 'doughnut',
+        data: { labels: labels, datasets: [{ data: data, backgroundColor: palette }] },
+        options: { plugins: { legend: { position: 'bottom' } } }
+      });
+    } catch (err) {
+      showError(id, err);
+    }
+  }
+
+  bar('categoryChart', {{ category_labels|safe }}, {{ category_data|safe }}, 'Jobs');
+  bar('skillChart', {{ skill_labels|safe }}, {{ skill_data|safe }}, 'Jobs requiring skill');
+  bar('locationChart', {{ location_labels|safe }}, {{ location_data|safe }}, 'Jobs');
+  doughnut('experienceChart', {{ experience_labels|safe }}, {{ experience_data|safe }});
+  doughnut('remoteChart', {{ remote_labels|safe }}, {{ remote_data|safe }});
+  bar('salaryCategoryChart', {{ salary_category_labels|safe }}, {{ salary_category_data|safe }}, 'Avg. salary (USD)');
+
+  try {
+    new Chart(document.getElementById('salaryTrendChart'), {
+      type: 'line',
+      data: {
+      labels: {{ salary_trend_labels|safe }},
+      datasets: [{
+        label: 'Average salary (USD)', data: {{ salary_trend_data|safe }},
+        borderColor: '#2f5fff', backgroundColor: 'rgba(47,95,255,0.08)', fill: true, tension: 0.3,
+      }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+  } catch (err) {
+    showError('salaryTrendChart', err);
+  }
+});
+</script>
+{% endblock %}

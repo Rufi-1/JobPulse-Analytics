@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.first_name|default:profile_user.username }} — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container" style="max-width:640px;">
+        {% if is_owner and not profile.is_public %}
+            <div class="alert alert-warning">
+                This profile is private — only you can see this page right now.
+                <a href="{% url 'accounts:profile_edit' %}">Make it public</a> to share it with others.
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="flex gap-2" style="align-items:center;">
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" alt="" class="avatar avatar-lg">
+                {% else %}
+                    <div class="company-logo-placeholder avatar-lg">{{ profile_user.username|slice:":1"|upper }}</div>
+                {% endif %}
+                <div>
+                    <h1 style="margin-bottom:2px;">{{ profile_user.first_name|default:profile_user.username }} {{ profile_user.last_name }}</h1>
+                    <p class="text-muted" style="margin:0;">{{ profile.headline|default:"" }}</p>
+                </div>
+            </div>
+
+            {% if profile.bio %}<p class="mt-2">{{ profile.bio }}</p>{% endif %}
+
+            <div class="job-tags mt-2">
+                {% if profile.desired_role %}<span class="badge">Open to: {{ profile.desired_role }}</span>{% endif %}
+                {% if profile.desired_location %}<span class="badge badge-info">{{ profile.desired_location }}</span>{% endif %}
+                <span class="badge badge-muted">{{ profile.get_experience_level_display }}</span>
+            </div>
+
+            {% if profile.skills.exists %}
+                <h3 class="mt-2" style="font-size:0.95rem;">Skills</h3>
+                <div class="job-tags">
+                    {% for skill in profile.skills.all %}<span class="badge badge-accent">{{ skill.name }}</span>{% endfor %}
+                </div>
+            {% endif %}
+
+            {% if profile.linkedin_url or profile.github_url or profile.portfolio_url %}
+                <h3 class="mt-2" style="font-size:0.95rem;">Links</h3>
+                <div class="flex gap-2">
+                    {% if profile.linkedin_url %}<a href="{{ profile.linkedin_url }}" target="_blank" rel="noopener">LinkedIn</a>{% endif %}
+                    {% if profile.github_url %}<a href="{{ profile.github_url }}" target="_blank" rel="noopener">GitHub</a>{% endif %}
+                    {% if profile.portfolio_url %}<a href="{{ profile.portfolio_url }}" target="_blank" rel="noopener">Portfolio</a>{% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

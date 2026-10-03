@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Sign up — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container" style="max-width:480px;">
+        <h1>Create your account</h1>
+        <p class="text-muted">Save jobs, track applications, and get personalized recommendations.</p>
+        <form method="post" class="card">
+            {% csrf_token %}
+
+            <div class="field">
+                <label>{{ form.role.label }}</label>
+                <ul class="radio-list">
+                    {% for radio in form.role %}
+                        <li><label>{{ radio.tag }} {{ radio.choice_label }}</label></li>
+                    {% endfor %}
+                </ul>
+                {% if form.role.help_text %}<span class="helptext">{{ form.role.help_text }}</span>{% endif %}
+                {% for error in form.role.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+
+            {% for field in form %}
+                {% if field.name != 'role' %}
+                    <div class="field">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+                        {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <button type="submit" class="btn btn-block">Sign up</button>
+        </form>
+        <p class="text-center mt-2">Already have an account? <a href="{% url 'accounts:login' %}">Log in</a></p>
+    </div>
+</section>
+{% endblock %}

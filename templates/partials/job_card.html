@@ -1,0 +1,19 @@
+{% load humanize %}
+<article class="card card-hover job-card">
+    <div class="flex-between">
+        <div>
+            <a href="{{ job.get_absolute_url }}" class="job-title">{{ job.title }}</a>
+            <div class="job-meta">{{ job.company.name }} &middot; {{ job.location }}</div>
+        </div>
+        {% if job.is_featured %}<span class="badge badge-warn">Featured</span>{% endif %}
+    </div>
+    <div class="job-tags">
+        <span class="badge">{{ job.get_experience_level_display }}</span>
+        <span class="badge badge-info">{{ job.get_remote_option_display }}</span>
+        <span class="badge badge-muted">{{ job.get_employment_type_display }}</span>
+    </div>
+    <div class="flex-between">
+        <strong>{{ job.salary_display }}</strong>
+        <span class="text-muted" style="font-size:0.82rem;">{{ job.posted_at|naturaltime }}</span>
+    </div>
+</article>

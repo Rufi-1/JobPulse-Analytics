@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Recommended for you — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <h1>Recommended for you</h1>
+        <p class="text-muted">Ranked using your skills, desired role, location, and experience level — fully rule-based and explainable.</p>
+
+        {% if not profile.skills.exists and not profile.desired_role %}
+            <div class="empty-state card">
+                <p>Add skills and a desired role to your profile for better recommendations.</p>
+                <a href="{% url 'accounts:profile_edit' %}" class="btn btn-sm">Complete your profile</a>
+            </div>
+        {% endif %}
+
+        <div class="grid grid-3 mt-2">
+            {% for job, result in scored_jobs %}
+                <div class="card card-hover">
+                    <div class="flex-between">
+                        <a href="{{ job.get_absolute_url }}" class="job-title">{{ job.title }}</a>
+                        <span class="match-score">{{ result.score }}%</span>
+                    </div>
+                    <div class="job-meta text-muted">{{ job.company.name }} &middot; {{ job.location }}</div>
+                    <div class="job-tags">
+                        <span class="badge">{{ job.get_experience_level_display }}</span>
+                        <span class="badge badge-info">{{ job.get_remote_option_display }}</span>
+                    </div>
+                    <strong>{{ job.salary_display }}</strong>
+                    {% if result.reasons %}
+                        <ul style="font-size:0.82rem; padding-left:18px; margin:8px 0 0;">
+                            {% for reason in result.reasons %}<li>{{ reason }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p class="text-muted">No matches found yet — try adding more skills to your profile.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

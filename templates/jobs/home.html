@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}{{ SITE_NAME }} — Data-Driven Job Market Analytics{% endblock %}
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <h1>Find your next role with data on your side.</h1>
+        <p class="lead">{{ SITE_DESCRIPTION }}</p>
+
+        <div class="hero-stats">
+            <div><div class="stat-value">{{ site_metrics.total_active_jobs }}</div><div class="stat-label">Active jobs</div></div>
+            <div><div class="stat-value">{{ site_metrics.total_companies }}</div><div class="stat-label">Companies hiring</div></div>
+            <div><div class="stat-value">{{ trending_skills|length }}</div><div class="stat-label">Trending skills tracked</div></div>
+        </div>
+
+        <form action="{% url 'jobs:job_list' %}" method="get" class="search-bar">
+            <div class="form-grid">
+                <div class="field" style="margin-bottom:0;">
+                    {{ search_form.q }}
+                </div>
+                <div class="field" style="margin-bottom:0;">
+                    {{ search_form.location }}
+                </div>
+                <button type="submit" class="btn">Search jobs</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="flex-between mb-2">
+            <h2>Featured &amp; recent openings</h2>
+            <a href="{% url 'jobs:job_list' %}">Browse all jobs &rarr;</a>
+        </div>
+        <div class="grid grid-3">
+            {% for job in featured_jobs %}
+                {% include "partials/job_card.html" %}
+            {% empty %}
+                <p class="text-muted">No jobs yet — run <code>python manage.py seed_data</code> to load sample data.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section-tight" style="background:#fff; border-top:1px solid var(--color-border); border-bottom:1px solid var(--color-border);">
+    <div class="container">
+        <h2>Browse by category</h2>
+        <div class="grid grid-4">
+            {% for category in top_categories %}
+                <a href="{{ category.get_absolute_url }}" class="card card-hover">
+                    <div style="font-size:1.6rem;">{{ category.icon }}</div>
+                    <strong>{{ category.name }}</strong>
+                    <div class="text-muted" style="font-size:0.85rem;">{{ category.job_count }} open roles</div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="grid grid-2">
+            <div>
+                <h2>Top hiring companies</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Company</th><th>Industry</th><th>Open roles</th></tr></thead>
+                        <tbody>
+                        {% for company in top_companies %}
+                            <tr>
+                                <td><a href="{{ company.get_absolute_url }}">{{ company.name }}</a></td>
+                                <td class="text-muted">{{ company.industry }}</td>
+                                <td>{{ company.job_count }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div>
+                <h2>Trending skills</h2>
+                <div class="card">
+                    {% for skill in trending_skills %}
+                        <div class="flex-between" style="padding:8px 0; {% if not forloop.last %}border-bottom:1px solid var(--color-border);{% endif %}">
+                            <a href="{{ skill.get_absolute_url }}">{{ skill.name }}</a>
+                            <span class="badge badge-accent">{{ skill.demand }} jobs</span>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">No skill data yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-tight text-center">
+    <div class="container">
+        <h2>Not sure what you're worth?</h2>
+        <p class="text-muted">Get an instant, rule-based salary estimate for any role, location, and skill set.</p>
+        <a href="{% url 'analytics:salary_predictor' %}" class="btn">Try the salary predictor</a>
+    </div>
+</section>
+{% endblock %}

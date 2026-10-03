@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Applicants for {{ job.title }} — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <p><a href="{% url 'jobs:my_job_postings' %}">&larr; My postings</a></p>
+        <h1>Applicants for {{ job.title }}</h1>
+        <p class="text-muted">{{ applications|length }} application{{ applications|length|pluralize }} received.</p>
+
+        {% for app in applications %}
+            <div class="card mb-2">
+                <div class="flex-between">
+                    <div>
+                        <strong>{{ app.user.first_name|default:app.user.username }} {{ app.user.last_name }}</strong>
+                        <span class="text-muted" style="font-size:0.85rem;">@{{ app.user.username }} &middot; applied {{ app.applied_at|naturaltime }}</span>
+                        {% if app.user.profile.is_public %}
+                            <div><a href="{{ app.user.profile.get_public_url }}" style="font-size:0.85rem;">View public profile &rarr;</a></div>
+                        {% endif %}
+                    </div>
+                    <span class="badge badge-info">{{ app.get_status_display }}</span>
+                </div>
+
+                {% if app.cover_letter %}
+                    <p class="mt-1" style="white-space:pre-line; font-size:0.9rem;">{{ app.cover_letter }}</p>
+                {% endif %}
+
+                {% if app.resume %}
+                    <a href="{{ app.resume.url }}" target="_blank" rel="noopener" class="badge badge-accent">📄 View resume</a>
+                {% else %}
+                    <span class="badge badge-muted">No resume uploaded</span>
+                {% endif %}
+
+                <form method="post" class="flex gap-1 mt-2" style="align-items:center;">
+                    {% csrf_token %}
+                    <input type="hidden" name="application_id" value="{{ app.id }}">
+                    <select name="status" class="input" style="width:auto;">
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if value == app.status %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-sm">Update status</button>
+                </form>
+            </div>
+        {% empty %}
+            <div class="empty-state card">
+                <p>No applications yet for this posting.</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

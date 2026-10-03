@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load job_extras %}
+{% block title %}{{ category.name }} jobs — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <h1>{{ category.icon }} {{ category.name }}</h1>
+        <p class="text-muted">{{ category.description }}</p>
+
+        <div class="grid grid-3 mt-2">
+            {% for job in jobs %}
+                {% include "partials/job_card.html" %}
+            {% empty %}
+                <p class="text-muted">No open roles in this category right now.</p>
+            {% endfor %}
+        </div>
+
+        {% querystring_without_page as qs %}
+        {% include "partials/pagination.html" with query_string=qs %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{% if company %}Edit company{% else %}Set up your company{% endif %} — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container" style="max-width:640px;">
+        <h1>{% if company %}Edit company profile{% else %}Set up your company{% endif %}</h1>
+        <p class="text-muted">This is the company profile job seekers will see attached to your postings.</p>
+        <form method="post" enctype="multipart/form-data" class="card">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+                    {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn">{% if company %}Save changes{% else %}Create company &amp; continue{% endif %}</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Edit profile — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container" style="max-width:720px;">
+        <h1>Edit your profile</h1>
+        <form method="post" enctype="multipart/form-data" class="card">
+            {% csrf_token %}
+            <h3>Account</h3>
+            <div class="form-grid">
+                {% for field in user_form %}
+                    <div class="field">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <hr class="divider">
+            <h3>Career profile</h3>
+            <div class="form-grid">
+                {% for field in profile_form %}
+                    {% if field.name != 'bio' and field.name != 'skills' %}
+                        <div class="field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="field">
+                <label for="{{ profile_form.bio.id_for_label }}">Bio</label>
+                {{ profile_form.bio }}
+            </div>
+            <div class="field">
+                <label>Skills</label>
+                <div class="checkbox-grid">
+                    {% for checkbox in profile_form.skills %}
+                        <label class="checkbox-field">{{ checkbox.tag }} {{ checkbox.choice_label }}</label>
+                    {% endfor %}
+                </div>
+                <span class="helptext">{{ profile_form.skills.help_text }}</span>
+            </div>
+
+            {% if profile.is_public %}
+                <div class="alert alert-info mt-2">
+                    Your profile is public. Share it: <a href="{{ profile.get_public_url }}">{{ request.scheme }}://{{ request.get_host }}{{ profile.get_public_url }}</a>
+                </div>
+            {% endif %}
+
+            <button type="submit" class="btn mt-2">Save profile</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

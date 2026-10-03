@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Apply to {{ job.title }} — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container" style="max-width:600px;">
+        <h1>Apply to {{ job.title }}</h1>
+        <p class="text-muted">{{ job.company.name }} &middot; {{ job.location }}</p>
+
+        <form method="post" enctype="multipart/form-data" class="card">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+                    {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-block">Submit application</button>
+        </form>
+        <p class="text-center mt-2"><a href="{{ job.get_absolute_url }}">&larr; Back to job details</a></p>
+    </div>
+</section>
+{% endblock %}

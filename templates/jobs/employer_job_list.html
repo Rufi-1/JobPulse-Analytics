@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}My job postings — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <div class="flex-between mb-2">
+            <h1>My job postings</h1>
+            <a href="{% url 'jobs:job_create' %}" class="btn">Post a new job</a>
+        </div>
+        <p class="text-muted">Posting as <strong>{{ company.name }}</strong>.</p>
+
+        <div class="table-wrap mt-2">
+            <table>
+                <thead><tr><th>Title</th><th>Status</th><th>Applications</th><th>Posted</th><th></th></tr></thead>
+                <tbody>
+                {% for job in postings %}
+                    <tr>
+                        <td><a href="{{ job.get_absolute_url }}">{{ job.title }}</a></td>
+                        <td>{% if job.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-muted">Inactive</span>{% endif %}</td>
+                        <td><a href="{% url 'jobs:job_applicants' job.slug %}">{{ job.application_count }}</a></td>
+                        <td class="text-muted">{{ job.posted_at|naturaltime }}</td>
+                        <td class="flex gap-1">
+                            <a href="{% url 'jobs:job_edit' job.slug %}">Edit</a>
+                            <form method="post" action="{% url 'jobs:job_toggle_active' job.slug %}" class="inline-form"
+                                  {% if job.is_active %}data-confirm="Deactivate &quot;{{ job.title }}&quot;? It will stop appearing in search results."{% endif %}>
+                                {% csrf_token %}
+                                <button type="submit" class="link-button" style="color:var(--color-primary);">
+                                    {% if job.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5" class="text-muted">You haven't posted any jobs yet.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load job_extras %}
+{% block title %}Companies — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <h1>Companies hiring</h1>
+        <form method="get" class="flex gap-1 mb-3">
+            <input class="input" type="text" name="q" value="{{ query }}" placeholder="Search companies or industries...">
+            <button type="submit" class="btn">Search</button>
+        </form>
+
+        <div class="grid grid-3">
+            {% for company in companies %}
+                <a href="{{ company.get_absolute_url }}" class="card card-hover">
+                    <div class="flex gap-2" style="align-items:center;">
+                        <div class="company-logo-placeholder">{{ company.name|slice:":1" }}</div>
+                        <div>
+                            <strong>{{ company.name }}</strong>
+                            <div class="text-muted" style="font-size:0.85rem;">{{ company.industry }}</div>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <span class="badge">{{ company.job_count }} open role{{ company.job_count|pluralize }}</span>
+                        <span class="badge badge-muted">{{ company.get_size_display }}</span>
+                    </div>
+                </a>
+            {% empty %}
+                <p class="text-muted">No companies found.</p>
+            {% endfor %}
+        </div>
+
+        {% querystring_without_page as qs %}
+        {% include "partials/pagination.html" with query_string=qs %}
+    </div>
+</section>
+{% endblock %}

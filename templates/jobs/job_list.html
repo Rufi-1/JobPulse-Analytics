@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Browse Jobs — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <h1>Browse jobs</h1>
+        <p class="text-muted">{{ total_results }} open role{{ total_results|pluralize }} matching your search.</p>
+
+        <form method="get" class="card mb-3">
+            <div class="form-grid">
+                <div class="field"><label for="{{ form.q.id_for_label }}">Keyword</label>{{ form.q }}</div>
+                <div class="field"><label for="{{ form.location.id_for_label }}">Location</label>{{ form.location }}</div>
+                <div class="field"><label for="{{ form.category.id_for_label }}">Category</label>{{ form.category }}</div>
+                <div class="field"><label for="{{ form.experience_level.id_for_label }}">Experience</label>{{ form.experience_level }}</div>
+                <div class="field"><label for="{{ form.employment_type.id_for_label }}">Type</label>{{ form.employment_type }}</div>
+                <div class="field"><label for="{{ form.remote_option.id_for_label }}">Work style</label>{{ form.remote_option }}</div>
+                <div class="field"><label for="{{ form.salary_min.id_for_label }}">Min. salary</label>{{ form.salary_min }}</div>
+                <div class="field"><label for="{{ form.sort.id_for_label }}">Sort by</label>{{ form.sort }}</div>
+            </div>
+            <button type="submit" class="btn mt-1">Apply filters</button>
+            <a href="{% url 'jobs:job_list' %}" class="btn btn-ghost mt-1">Reset</a>
+        </form>
+
+        <div class="grid grid-3">
+            {% for job in jobs %}
+                {% include "partials/job_card.html" %}
+            {% empty %}
+                <div class="empty-state">
+                    <h3>No jobs match your filters</h3>
+                    <p>Try broadening your search criteria.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% load job_extras %}
+        {% querystring_without_page as qs %}
+        {% include "partials/pagination.html" with query_string=qs %}
+    </div>
+</section>
+{% endblock %}

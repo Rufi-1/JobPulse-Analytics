@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Saved jobs — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <h1>Saved jobs</h1>
+        <div class="grid grid-3">
+            {% for saved in saved_jobs %}
+                {% with job=saved.job %}
+                    {% include "partials/job_card.html" %}
+                {% endwith %}
+            {% empty %}
+                <div class="empty-state">
+                    <p>You haven't saved any jobs yet.</p>
+                    <a href="{% url 'jobs:job_list' %}" class="btn btn-sm">Browse jobs</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

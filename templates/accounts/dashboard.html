@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Dashboard — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section-tight">
+    <div class="container">
+        <div class="flex-between mb-2">
+            <div>
+                <h1>Welcome back, {{ user.first_name|default:user.username }}</h1>
+                <p class="text-muted">{{ profile.headline|default:"Add a headline to complete your profile." }}</p>
+            </div>
+            <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline">Edit profile</a>
+        </div>
+
+        <div class="grid grid-3 mb-3">
+            <div class="card">
+                <div class="text-muted" style="font-size:0.85rem;">Profile completeness</div>
+                <div class="progress-bar mt-1"><div class="progress-bar-fill" style="width:{{ profile.completeness }}%;"></div></div>
+                <div class="mt-1">{{ profile.completeness }}%</div>
+            </div>
+            <div class="card">
+                <div class="text-muted" style="font-size:0.85rem;">Saved jobs</div>
+                <div style="font-size:1.6rem; font-weight:800;">{{ saved_count }}</div>
+                <a href="{% url 'accounts:my_saved_jobs' %}">View all &rarr;</a>
+            </div>
+            <div class="card">
+                <div class="text-muted" style="font-size:0.85rem;">Applications</div>
+                <div style="font-size:1.6rem; font-weight:800;">{{ applications_count }}</div>
+                <a href="{% url 'accounts:my_applications' %}">View all &rarr;</a>
+            </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 2fr 1fr; align-items:start;">
+            <div>
+                <h2>Recommended for you</h2>
+                {% if recommendations %}
+                    <div class="grid grid-2">
+                        {% for job, result in recommendations %}
+                            <div class="card card-hover">
+                                <div class="flex-between">
+                                    <a href="{{ job.get_absolute_url }}" class="job-title">{{ job.title }}</a>
+                                    <span class="match-score">{{ result.score }}%</span>
+                                </div>
+                                <div class="job-meta text-muted">{{ job.company.name }} &middot; {{ job.location }}</div>
+                                {% if result.reasons %}
+                                    <ul style="font-size:0.82rem; padding-left:18px; margin:8px 0 0;">
+                                        {% for reason in result.reasons|slice:":2" %}<li>{{ reason }}</li>{% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'analytics:recommendations' %}" class="mt-1" style="display:inline-block;">See all recommendations &rarr;</a>
+                {% else %}
+                    <div class="empty-state card">
+                        <p>Add skills and a desired role to your profile to get personalized recommendations.</p>
+                        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-sm">Complete your profile</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <h2>Recent applications</h2>
+                {% for app in applications %}
+                    <div class="card mb-2">
+                        <a href="{{ app.job.get_absolute_url }}"><strong>{{ app.job.title }}</strong></a>
+                        <div class="text-muted" style="font-size:0.85rem;">{{ app.job.company.name }}</div>
+                        <span class="badge badge-info mt-1">{{ app.get_status_display }}</span>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No applications yet.</p>
+                {% endfor %}
+
+                {% if gap_analysis %}
+                <div class="card mt-2">
+                    <h3 style="font-size:0.95rem;">Your market position</h3>
+                    {% if gap_analysis.missing %}
+                        <p class="text-muted" style="font-size:0.85rem;">Consider learning: {% for entry in gap_analysis.missing|slice:":3" %}{{ entry.skill.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                    {% endif %}
+                    <a href="{% url 'analytics:market_position' %}" style="font-size:0.85rem;">See full analysis &rarr;</a>
+                </div>
+                {% endif %}
+
+                {% if profile.is_public %}
+                <div class="card mt-2">
+                    <h3 style="font-size:0.95rem;">Your public profile</h3>
+                    <p class="text-muted" style="font-size:0.82rem; word-break:break-all;">{{ request.scheme }}://{{ request.get_host }}{{ profile.get_public_url }}</p>
+                    <a href="{{ profile.get_public_url }}" style="font-size:0.85rem;">View &rarr;</a>
+                </div>
+                {% else %}
+                <div class="card mt-2">
+                    <h3 style="font-size:0.95rem;">Share your profile</h3>
+                    <p class="text-muted" style="font-size:0.82rem;">Your profile is currently private.</p>
+                    <a href="{% url 'accounts:profile_edit' %}" style="font-size:0.85rem;">Make it public &rarr;</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
